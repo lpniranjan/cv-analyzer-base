@@ -1,6 +1,6 @@
 import openai
 
-openai.api_key = '#######'
+openai.api_key = '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'
 
 def GetSentimentScore(text):
     # Use OpenAI to analyze the sentiment of the text

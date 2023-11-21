@@ -14,6 +14,16 @@ css = '''
     color: #fff;
     border-radius: 10px;
 }
+.chat-message.scorng{
+    background-color: #f54242;
+    color: #fff;
+    border-radius: 10px;
+}
+.chat-message.scorps{
+    background-color: #1BBC94;
+    color: #fff;
+    border-radius: 10px;
+}
 .chat-message .avatar{
     width: 15%;
 }
@@ -37,6 +47,18 @@ CV_template = '''
 
 ANA_template = '''
 <div class="chat-message ana">
+<div class="message">{{MSG}}</div>
+</div>
+'''
+
+SC_template_ng = '''
+<div class="chat-message scorng">
+<div class="message">{{MSG}}</div>
+</div>
+'''
+
+SC_template_ps = '''
+<div class="chat-message scorps">
 <div class="message">{{MSG}}</div>
 </div>
 '''

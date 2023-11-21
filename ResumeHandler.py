@@ -6,6 +6,7 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+import spacy
 
 
 # Analyze resumes
@@ -21,28 +22,42 @@ def GetSingleResumeResult(pdfDoc, userQuestion,jobTitle):
 
      texts = GetCVTextChunkAnalysis(pdfText)
 
-     pdfAnalysis = GetResumeAnalysis(userQuestion, texts)
      linkedinURL = GetResumeAnalysis("what is the LinkedIn URL of this resume?", texts)
      if "The LinkedIn URL of this resume is" in linkedinURL: 
-      linkedinURL = linkedinURL.replace("The LinkedIn URL of this resume is", "")     
-     if "This resume does not have a LinkedIn URL." in linkedinURL or "There is no LinkedIn URL in this resume." in linkedinURL: 
+      linkedinURL = linkedinURL.replace("The LinkedIn URL of this resume is", "") 
+     if "The linkedin URL of this resume is" in linkedinURL: 
+      linkedinURL = linkedinURL.replace("The linkedin URL of this resume is", "") 
+
+     linkedinURL = linkedinURL.replace(".", "")      
+     if "This resume does not have a LinkedIn URL." in linkedinURL or "There is no LinkedIn URL in this resume." in linkedinURL or "The LinkedIn URL is not provided in this resume." in linkedinURL: 
       linkedinURL = ""
      
      githubURL = GetResumeAnalysis("what is the github URL of this resume?", texts)
      if "The GitHub URL of this resume is" in githubURL: 
       githubURL = githubURL.replace("The GitHub URL of this resume is", "") 
-     if "This resume does not have a GitHub URL." in githubURL or "There is no GitHub URL in this resume." in githubURL: 
-      githubURL = ""
+     if "The github URL of this resume is" in githubURL: 
+      githubURL = githubURL.replace("The github URL of this resume is", "") 
+     if "The github URL for this resume is" in githubURL: 
+      githubURL = githubURL.replace("The github URL for this resume is", "")  
 
+     githubURL = githubURL.replace(".", "") 
+     if "This resume does not have a GitHub URL." in githubURL or "There is no GitHub URL in this resume." in githubURL or "The GitHub URL is not provided in this resume." in githubURL: 
+      githubURL = ""
+ 
      facebookURL = GetResumeAnalysis("what is the FaceBook URL of this resume?", texts)
      if "The Facebook URL of this resume is" in facebookURL: 
       facebookURL = facebookURL.replace("The Facebook URL of this resume is", "") 
-     if "This resume does not have a Facebook URL." in facebookURL or "There is no Facebook URL in this resume." in facebookURL: 
+     if "This resume does not have a Facebook URL." in facebookURL or "There is no Facebook URL in this resume." in facebookURL or "The Facebook URL is not provided in this resume." in facebookURL: 
       facebookURL = ""
 
+     #matchingPercentage = GetResumeAnalysis(f"Please evaluate this following resume, Provide feedback on the candidate's qualifications, skills, and overall suitability for the {jobTitle} role.", texts)
+     matchingPercentage = GetResumeAnalysis(userQuestion, texts)
+     
      candidateEmail = GetResumeAnalysis("what is the candidate email of this resume?", texts).replace("The candidate email is ", "")
      jobDescription = GetJobDescription(jobTitle)
-     pdfDict[pdfName] = [{ 'analysis': pdfAnalysis, 'jobDescription': jobDescription, 'linkedinURL': linkedinURL, 'githubURL': githubURL, 'facebookURL': facebookURL, 'candidateEmail': candidateEmail }]
+     candidateScore = GetResumeAnalysisScore(jobDescription,matchingPercentage)
+     jobSkills = GetJobSkiilList(jobTitle)
+     pdfDict[pdfName] = [{ 'analysis': matchingPercentage, 'jobDescription': jobDescription, 'matchingPercentage': candidateScore,'jobSkills': jobSkills, 'linkedinURL': linkedinURL, 'githubURL': githubURL, 'facebookURL': facebookURL, 'candidateEmail': candidateEmail }]
           
      return pdfDict 
 
@@ -76,6 +91,18 @@ def GetJobDescription(jobTitle):
      prompt = PromptTemplate(
      input_variables=["jobTitle"],
      template="What is the description of {jobTitle} ?",
+     )
+     chain = LLMChain(llm=llm, prompt=prompt)
+     cvAnalysis = chain.run({"jobTitle":jobTitle})
+     return cvAnalysis
+
+def GetJobSkiilList(jobTitle):
+     cvAnalysis =""
+     llm = OpenAI(temperature=0.9)
+
+     prompt = PromptTemplate(
+     input_variables=["jobTitle"],
+     template="Technical skill list for {jobTitle}",
      )
      chain = LLMChain(llm=llm, prompt=prompt)
      cvAnalysis = chain.run({"jobTitle":jobTitle})
@@ -122,3 +149,24 @@ def GetCVTextAnalysis(cvContent, userQuestion):
      return cvAnalysis
 
 #End multiple resume analysis
+
+def GetLinkedInResult(userQuestion,textJson): 
+     texts = GetCVTextChunkAnalysis(textJson)
+     pdfAnalysis = GetResumeAnalysis(userQuestion, texts)
+     return pdfAnalysis
+
+def GetResumeAnalysisScore(jobPost,resumeText):
+    spacy.cli.download("en_core_web_md")
+
+    nlp = spacy.load("en_core_web_md")
+    # Process the text using spaCy
+    jobPostDoc = nlp(jobPost)
+    print("jd");
+    print(jobPostDoc);
+    resumeDoc = nlp(resumeText)
+    print("res");
+    print(resumeDoc);
+
+    # Calculate similarity between job post and resume
+    similarity_score = round(((resumeDoc.similarity(jobPostDoc)) * 100),2)
+    return similarity_score
