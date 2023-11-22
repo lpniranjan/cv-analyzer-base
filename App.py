@@ -73,9 +73,9 @@ if st.sidebar.button("Forecast"):
                          st.write(CV_template.replace("{{MSG}}", "LinkedIn forecast:"),unsafe_allow_html=True)
                          st.write(ANA_template.replace("{{MSG}}", (JsonAnalysis.ProcessJsonData(linkdata)).strip()),unsafe_allow_html=True)
                     
-                    if gitURL and gitURL != '':
-                         st.write(CV_template.replace("{{MSG}}", "GitHub forecast:"),unsafe_allow_html=True)
-                         st.write(ANA_template.replace("{{MSG}}", (GitHubData.GetGithubRepoDetails(gitURL)).strip()),unsafe_allow_html=True)
+                    #if gitURL and gitURL != '':
+                     #    st.write(CV_template.replace("{{MSG}}", "GitHub forecast:"),unsafe_allow_html=True)
+                     #    st.write(ANA_template.replace("{{MSG}}", (GitHubData.GetGithubRepoDetails(gitURL)).strip()),unsafe_allow_html=True)
                     
                   
                     #kew2 = keywordAnalysis.GetKeywords((y[0]["analysis"]).strip())
