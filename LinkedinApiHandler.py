@@ -27,7 +27,10 @@ def login(email, password):
     soup = BeautifulSoup(r.text, 'html.parser')
 
 def GetLinkedInProfileData(linkedInURL):
-    linkedInURLParts = linkedInURL.split('/')
-    api = Linkedin(LINKEDIN_USERNAME, LINKEDIN_PASSWORD)
-    profile = linkedInURLParts[len(linkedInURLParts)-1]
-    return api.get_profile(profile)  
+    try:
+        linkedInURLParts = linkedInURL.split('/')
+        api = Linkedin(LINKEDIN_USERNAME, LINKEDIN_PASSWORD)
+        profile = linkedInURLParts[len(linkedInURLParts)-1]
+        return api.get_profile(profile)
+    except Exception as e:
+        return e 
